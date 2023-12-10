@@ -233,7 +233,8 @@ class GenericWorld:
         else:    
             self._update_data()
         
-        observation = np.append([self.pos[0], self.pos[1], self.angle], self.point_cloud)
+        distance_to_goal = ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
+        observation = np.append([distance_to_goal, self.angle], self.point_cloud)
         return observation
 
 
@@ -279,7 +280,8 @@ class GenericWorld:
             print(reward)
             done = False
             
-        observation = np.append([self.pos[0], self.pos[1], self.angle], self.point_cloud)
+        distance_to_goal = ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
+        observation = np.append([distance_to_goal, self.angle], self.point_cloud)
         return observation, reward, done
 
 

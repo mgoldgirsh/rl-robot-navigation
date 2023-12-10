@@ -381,7 +381,7 @@ if __name__ == "__main__":
     # this should take about 90-120 minutes on a generic 4-core laptop
     dqn_models, returns, lengths, losses = train_dqn(
         env,
-        observation_space=184,
+        observation_space=183,
         action_space=2,
         num_steps=num_steps,
         num_saves=num_saves,
