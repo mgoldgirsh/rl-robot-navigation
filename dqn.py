@@ -258,7 +258,7 @@ def train_dqn(
     i_episode = 0  # use this to indicate the index of the current episode
     t_episode = 0  # use this to indicate the time-step inside current episode
 
-    state = env.reset()  # initialize state of first episode
+    state = env.reset(render=True)  # initialize state of first episode
 
     # iterate for a total of `num_steps` steps
     pbar = tqdm.trange(num_steps, ncols=100)
@@ -311,7 +311,7 @@ def train_dqn(
             # episode, e.g. compute return G, store stuff, reset variables,
             # indices, lists, etc.
 
-            state = env.reset()
+            state = env.reset(render=True)
             lengths.append(t_episode + 1)
             returns.append(G)
             

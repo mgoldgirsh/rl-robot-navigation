@@ -50,7 +50,7 @@ if __name__ == "__main__":
     episodes = 5000
     gamma = 0.99
     for episode_num in range(episodes):
-        env.reset()
+        env.reset(render=True)
         G = 0
         done = False
         timestep = 0
@@ -60,6 +60,6 @@ if __name__ == "__main__":
             G = reward + gamma * G
             if (done): 
                 print('discounted return', G, 'timestep', timestep)
-                env.reset()
+                env.reset(render=True)
 
             timestep += 1
