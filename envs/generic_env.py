@@ -277,7 +277,6 @@ class GenericWorld:
             # return the next state 
             # calculate how close the goal is to the pos 
             reward = (((self.pos[0] - self.goal[0]) ** 2  + (self.pos[1] - self.goal[1]) ** 2) ** .5 / self.max_view) * -1
-            print(reward)
             done = False
             
         distance_to_goal = ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
