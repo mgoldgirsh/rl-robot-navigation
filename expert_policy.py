@@ -6,6 +6,7 @@ import numpy as np
 class ExpertPolicy():
     def __init__(self, env: GenericWorld) -> None:
         self.env = env
+        self.has_collision_count = 0
     
     def find_action(self) -> RobotAction:
         robot_pos = self.env.pos
@@ -14,15 +15,31 @@ class ExpertPolicy():
         angle_to_go = round(-np.arctan2(goal_pos[1] - robot_pos[1], (goal_pos[0] - robot_pos[0])) * 180/np.pi)
         print(self.env.angle, angle_to_go)
         
-        updated_pos = robot_pos[0] + np.cos(angle_to_go * np.pi/180), robot_pos[1] + np.sin(angle_to_go * np.pi/180)
-        if (self.env.has_collision(updated_pos)):
-            return RobotAction.ROTATE
-        
-        if (self.env.angle - 360 == angle_to_go):
-            return RobotAction.FORWARD
+        cur_angle = 0
+        if (self.env.angle >= 360):
+            cur_angle = self.env.angle - 360
+        elif (self.env.angle <= -360):
+            cur_angle = self.env.angle + 360
         else:
-            return RobotAction.ROTATE
+            cur_angle = self.env.angle
         
+        updated_pos = (robot_pos[0] + 10 * np.cos(angle_to_go * np.pi/180), 
+                       robot_pos[1] + 10 * np.sin(angle_to_go * np.pi/180))
+        
+        if (env.has_collision(updated_pos)):
+            self.has_collision_count += 1
+            return RobotAction.ROTATE_LEFT
+        
+        if (self.has_collision_count > 0):
+            self.has_collision_count -= 1
+            return RobotAction.FORWARD
+        
+        if (cur_angle < angle_to_go):
+            return RobotAction.ROTATE_LEFT
+        elif(cur_angle > angle_to_go):
+            return RobotAction.ROTATE_RIGHT
+        else:
+            return RobotAction.FORWARD        
 
         
         
@@ -40,7 +57,7 @@ if __name__ == "__main__":
         while not done:
             action = expert.find_action()
             next_state, reward, done = env.step(action, render=True)
-            G += reward + G * gamma
+            G = reward + gamma * G
             if (done): 
                 print('discounted return', G, 'timestep', timestep)
                 env.reset()

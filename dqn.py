@@ -335,7 +335,34 @@ def train_dqn(
         np.array(lengths),
         np.array(losses),
     )
-    
+
+def plot(returns, lengths, losses):
+    ### YOUR PLOTTING CODE HERE
+    plt.plot(range(len(returns)), returns, color='red', alpha=0.5, label='raw return data')
+    plt.plot(range(len(returns)), rolling_average(data=returns, window_size=100), color='red', label='smooth return data')
+    plt.title("MountainCar: Return per Episode")
+    plt.xlabel("Episode")
+    plt.ylabel("Discounted Return")
+    plt.legend()
+    plt.show()
+
+    plt.plot(range(len(losses)), losses, color='blue', alpha=0.5, label='raw loss data')
+    plt.plot(range(len(losses)), rolling_average(data=losses, window_size=100), color='blue', label='smooth loss data')
+    plt.title("MountainCar: Loss per 4 Steps")
+    plt.xlabel("4 Steps")
+    plt.ylabel("Loss value")
+    plt.legend()
+    plt.show()
+
+    plt.plot(range(len(lengths)), lengths, color='green', alpha=0.5, label='raw length data')
+    plt.plot(range(len(lengths)), rolling_average(data=lengths, window_size=100), color='green', label='smooth length data')
+    plt.title("MountainCar: Epsiode Length per Episode")
+    plt.xlabel("Episode")
+    plt.ylabel("Episode Length")
+    plt.legend()
+    plt.show()
+
+
 if __name__ == "__main__":
     env = ObstaclesWorld(500, 500, see_all=True)
     gamma = 0.99
@@ -366,31 +393,7 @@ if __name__ == "__main__":
         render=True
     )
 
-    
-    ### YOUR PLOTTING CODE HERE
-    plt.plot(range(len(returns)), returns, color='red', alpha=0.5, label='raw return data')
-    plt.plot(range(len(returns)), rolling_average(data=returns, window_size=100), color='red', label='smooth return data')
-    plt.title("MountainCar: Return per Episode")
-    plt.xlabel("Episode")
-    plt.ylabel("Discounted Return")
-    plt.legend()
-    plt.show()
-
-    plt.plot(range(len(losses)), losses, color='blue', alpha=0.5, label='raw loss data')
-    plt.plot(range(len(losses)), rolling_average(data=losses, window_size=100), color='blue', label='smooth loss data')
-    plt.title("MountainCar: Loss per 4 Steps")
-    plt.xlabel("4 Steps")
-    plt.ylabel("Loss value")
-    plt.legend()
-    plt.show()
-
-    plt.plot(range(len(lengths)), lengths, color='green', alpha=0.5, label='raw length data')
-    plt.plot(range(len(lengths)), rolling_average(data=lengths, window_size=100), color='green', label='smooth length data')
-    plt.title("MountainCar: Epsiode Length per Episode")
-    plt.xlabel("Episode")
-    plt.ylabel("Episode Length")
-    plt.legend()
-    plt.show()
+    plot()
     # assert len(dqn_models) == num_saves
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
 

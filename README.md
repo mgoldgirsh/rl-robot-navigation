@@ -22,7 +22,8 @@ The `observation space` of the simulation is
 
 The `action space` of the simulation has been simplified to a discrete action space with 
 1. `RobotAction.FORWARD` - sets the linear velocity of the robot to 1
-2. `RobotAction.ROTATE` - sets the angular velocity of the rotation to 1
+2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 1
+3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -1
 
 
 ## Algorithms used for Training

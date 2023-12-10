@@ -3,12 +3,12 @@ import numpy as np
 from typing import List, Tuple
 from .obstacle import Obstacle
 from threading import Thread
-import time
 from enum import IntEnum
 
 class RobotAction(IntEnum):
     FORWARD = 0, # vel = 1, rotation = 0
-    ROTATE = 1 # vel = 0, rotation = 1
+    ROTATE_LEFT = 1 # vel = 0, rotation = 1
+    ROTATE_RIGHT = -1 # vel = 0, rotation = -1
     
 
 class GenericWorld: 
@@ -55,8 +55,6 @@ class GenericWorld:
         self.top = Tk()
         self.canvas = Canvas(self.top, height=height, width=width)
         
-        
-        
         # on key press
         if (manual):
             # background tick update
@@ -90,17 +88,21 @@ class GenericWorld:
                                     updated_pos[0] + size/2, updated_pos[1] + size/2, fill='black', tags='fov')
             i += 1
 
+
     def _update_position(self) -> None:
         # update the angle first 
         self.angle += self.rotational_vel
         
         updated_vel = (self.vel * np.cos(-self.angle * np.pi / 180), 
                        self.vel * np.sin(-self.angle * np.pi / 180))
-        updated_pos = (self.pos[0] + updated_vel[0], self.pos[1] + updated_vel[1])
-        self.pos = updated_pos
-        # if not self.has_collision(updated_pos):
-        #     self.pos = updated_pos
-    
+        updated_pos = (self.pos[0] + updated_vel[0], self.pos[1] + updated_vel[1])        
+        
+        if (self.manual):
+            if not self.has_collision(updated_pos):
+                self.pos = updated_pos
+        else:
+            self.pos = updated_pos
+            
     
     def _calculate_distance_from(self, fov_angle: int, index: int) -> float:        
         constants = (self.pos[0], self.pos[1])
@@ -220,12 +222,16 @@ class GenericWorld:
             return False
     
                 
-    def reset(self) -> np.array:
+    def reset(self, render:bool = False) -> np.array:
         self.pos = self._generate_random_position()
         self.goal = self._generate_random_position()
+        self.angle = 0
         self.vel = 0 
         self.rotational_vel = 0
-        self._update_data()
+        if (render or self.manual):
+            self._update()
+        else:    
+            self._update_data()
         
         observation = np.append([self.pos[0], self.pos[1], self.angle], self.point_cloud)
         return observation
@@ -235,18 +241,16 @@ class GenericWorld:
         # actions are a linear velocity and an angular velocity
         # reward of 100 is given for getting to goal
         # reward of -100 is given for collision
-        # self.vel = action[0]
-        # self.rotational_vel = action[1]
-        # if (action == RobotAction.OFF):
-        #     self.vel = 0
-        #     self.rotational_vel = 0
         if (action == RobotAction.FORWARD):
             self.vel = 1
             self.rotational_vel = 0
-        elif (action == RobotAction.ROTATE):
+        elif (action == RobotAction.ROTATE_LEFT):
             self.vel = 0
             self.rotational_vel = 1
-        
+        elif (action == RobotAction.ROTATE_RIGHT):
+            self.vel = 0
+            self.rotational_vel = -1
+            
         # update the simulation env
         # tick one timestep
         if (render or self.manual):
@@ -271,7 +275,8 @@ class GenericWorld:
         else: 
             # return the next state 
             # calculate how close the goal is to the pos 
-            reward = (1 - (((self.pos[0] - self.goal[0]) ** 2  + (self.pos[1] - self.goal[1]) ** 2) ** .5 / self.max_view)) * -1
+            reward = (((self.pos[0] - self.goal[0]) ** 2  + (self.pos[1] - self.goal[1]) ** 2) ** .5 / self.max_view) * -1
+            print(reward)
             done = False
             
         observation = np.append([self.pos[0], self.pos[1], self.angle], self.point_cloud)

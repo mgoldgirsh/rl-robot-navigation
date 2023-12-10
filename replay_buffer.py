@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from envs.generic_env import RobotAction
+
 # Batch namedtuple, i.e. a class which contains the given attributes
 Batch = namedtuple(
     'Batch', ('states', 'actions', 'rewards', 'next_states', 'dones')
@@ -106,7 +108,7 @@ class ReplayMemory:
         # Hint:  don't repeat code!  Use the self.add() method!
         
         def policy(state):
-            return np.random.randint(2)
+            return np.random.randint(len(RobotAction))
         
         step = 0
         state = env.reset()
