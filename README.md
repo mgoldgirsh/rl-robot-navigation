@@ -25,7 +25,11 @@ The `action space` of the simulation has been simplified to a discrete action sp
 2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 1
 3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -1
 
-## Instalation 
+## Installation 
+```
+git clone git@github.com:mgoldgirsh/rl-robot-navigation.git
+```
+
 Python 3.8 >=
 Install PyTorch on your computer
 
