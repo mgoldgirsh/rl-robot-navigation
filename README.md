@@ -30,6 +30,7 @@ git clone git@github.com:mgoldgirsh/rl-robot-navigation.git
 ```
 
 Python 3.8 >=
+
 Install PyTorch on your computer
 
 https://pytorch.org/get-started/locally/
