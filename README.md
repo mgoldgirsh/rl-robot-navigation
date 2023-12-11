@@ -25,6 +25,18 @@ The `action space` of the simulation has been simplified to a discrete action sp
 2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 1
 3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -1
 
+## Instalation 
+Python 3.8 >=
+Install PyTorch on your computer
+
+https://pytorch.org/get-started/locally/
+
+Then 
+```
+pip3 install -r requirements.txt
+```
+
+Run `dqn.py` :)
 
 ## Algorithms used for Training
 
