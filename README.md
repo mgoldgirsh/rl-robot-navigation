@@ -25,22 +25,23 @@ The `action space` of the simulation has been simplified to a discrete action sp
 3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -1
 
 ## Installation 
-```
+Git clone into this repository using the following command.
+```bash
 git clone git@github.com:mgoldgirsh/rl-robot-navigation.git
 ```
 
-Python 3.8 >=
+### Requirements
+Need you need to have Python 3.8 >= to run this program
 
-Install PyTorch on your computer
-
+Install PyTorch on your computer using the following website. \
 https://pytorch.org/get-started/locally/
 
 Then 
-```
+```bash
 pip3 install -r requirements.txt
 ```
 
-Run `dqn.py` :)
+Run `dqn.py` for DQN learning, or run `imitation.py` for immitation learning. Train and see results! :)
 
 ## Algorithms used for Training
 
