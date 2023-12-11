@@ -96,7 +96,7 @@ class ReplayMemory:
 
         return batch
 
-    def populate(self, env, num_steps):
+    def populate(self, env, num_steps, policy: callable = None,):
         """Populate this replay memory with `num_steps` from the random policy.
 
         :param env:  Openai Gym environment
@@ -106,13 +106,14 @@ class ReplayMemory:
         # YOUR CODE HERE:  run a random policy for `num_steps` time-steps and
         # populate the replay memory with the resulting transitions.
         # Hint:  don't repeat code!  Use the self.add() method!
-        
-        def policy(state):
-            return np.random.randint(len(RobotAction))
+
+        if (policy is None):
+            policy = np.random.randint(len(RobotAction))
         
         step = 0
         state = env.reset()
         while step < num_steps:
+            print('at time step', step)
             action = policy(state)
             
             next_state, reward, done = env.step(action)

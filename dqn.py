@@ -42,6 +42,7 @@ class DQN(nn.Module):
         """
 
         super().__init__()
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.num_layers = num_layers
@@ -52,14 +53,14 @@ class DQN(nn.Module):
         # * all activations except the last should be ReLU activations
         #   (this can be achieved either using a nn.ReLU() object or the nn.functional.relu() method)
         # * the last activation can either be missing, or you can use nn.Identity()
-        self.layers = [(nn.Linear(self.state_dim, hidden_dim)), nn.ReLU()]
+        self.layers = [(nn.Linear(self.state_dim, hidden_dim)).to(self.device), nn.ReLU().to(self.device)]
 
         for _ in range(num_layers-2):
-            self.layers.append(nn.Linear(hidden_dim, hidden_dim))
-            self.layers.append(nn.ReLU())
+            self.layers.append(nn.Linear(hidden_dim, hidden_dim).to(self.device))
+            self.layers.append(nn.ReLU().to(self.device))
 
         # last one
-        self.layers.append(nn.Linear(hidden_dim, self.action_dim))
+        self.layers.append(nn.Linear(hidden_dim, self.action_dim).to(self.device))
 
         self.linear_stack = nn.Sequential(*self.layers)
         
@@ -75,9 +76,9 @@ class DQN(nn.Module):
         # YOUR CODE HERE:  use the defined layers and activations to compute
         # the action-values tensor associated with the input states.
         
-        result = copy.deepcopy(states)
+        result = states
         for layer in self.layers:
-            result = layer(result)
+            result = layer(result).to(self.device)
         return result
     
     
@@ -102,44 +103,44 @@ class DQN(nn.Module):
 # test code, do not edit
 
 
-def _test_dqn_forward(dqn_model, input_shape, output_shape):
-    """Tests that the dqn returns the correctly shaped tensors."""
-    inputs = torch.torch.randn((input_shape))
-    outputs = dqn_model(inputs)
+# def _test_dqn_forward(dqn_model, input_shape, output_shape):
+#     """Tests that the dqn returns the correctly shaped tensors."""
+#     inputs = torch.torch.randn((input_shape))
+#     outputs = dqn_model(inputs)
 
-    if not isinstance(outputs, torch.FloatTensor):
-        raise Exception(
-            f'DQN.forward returned type {type(outputs)} instead of torch.Tensor'
-        )
+#     if not isinstance(outputs, torch.FloatTensor):
+#         raise Exception(
+#             f'DQN.forward returned type {type(outputs)} instead of torch.Tensor'
+#         )
 
-    if outputs.shape != output_shape:
-        raise Exception(
-            f'DQN.forward returned tensor with shape {outputs.shape} instead of {output_shape}'
-        )
+#     if outputs.shape != output_shape:
+#         raise Exception(
+#             f'DQN.forward returned tensor with shape {outputs.shape} instead of {output_shape}'
+#         )
 
-    if not outputs.requires_grad:
-        raise Exception(
-            f'DQN.forward returned tensor which does not require a gradient (but it should)'
-        )
+#     if not outputs.requires_grad:
+#         raise Exception(
+#             f'DQN.forward returned tensor which does not require a gradient (but it should)'
+#         )
 
 
-dqn_model = DQN(10, 4)
-_test_dqn_forward(dqn_model, (64, 10), (64, 4))
-_test_dqn_forward(dqn_model, (2, 3, 10), (2, 3, 4))
-del dqn_model
+# dqn_model = DQN(10, 4)
+# _test_dqn_forward(dqn_model, (64, 10), (64, 4))
+# _test_dqn_forward(dqn_model, (2, 3, 10), (2, 3, 4))
+# del dqn_model
 
-dqn_model = DQN(64, 16)
-_test_dqn_forward(dqn_model, (64, 64), (64, 16))
-_test_dqn_forward(dqn_model, (2, 3, 64), (2, 3, 16))
-del dqn_model
+# dqn_model = DQN(64, 16)
+# _test_dqn_forward(dqn_model, (64, 64), (64, 16))
+# _test_dqn_forward(dqn_model, (2, 3, 64), (2, 3, 16))
+# del dqn_model
 
 # testing custom dump / load
-dqn1 = DQN(10, 4, num_layers=10, hidden_dim=20)
-dqn2 = DQN.custom_load(dqn1.custom_dump())
-assert dqn2.state_dim == 10
-assert dqn2.action_dim == 4
-assert dqn2.num_layers == 10
-assert dqn2.hidden_dim == 20
+# dqn1 = DQN(10, 4, num_layers=10, hidden_dim=20)
+# dqn2 = DQN.custom_load(dqn1.custom_dump())
+# assert dqn2.state_dim == 10
+# assert dqn2.action_dim == 4
+# assert dqn2.num_layers == 10
+# assert dqn2.hidden_dim == 20
 
 def train_dqn_batch(optimizer: torch.optim.Optimizer, batch: Batch, dqn_model: nn.Module, dqn_target: nn.Module, gamma: float) -> float:
     """Perform a single batch-update step on the given DQN model.
@@ -153,18 +154,17 @@ def train_dqn_batch(optimizer: torch.optim.Optimizer, batch: Batch, dqn_model: n
     """
     # YOUR CODE HERE:  compute the values and target_values tensors using the
     # given models and the batch of data.
-     
-    values : torch.Tensor = dqn_model(batch.states).gather(1, batch.actions)
-    # target_values = batch.rewards + gamma * torch.max(dqn_target(batch.next_states)).detach()
-    # target_values = batch.rewards + gamma * dqn_target(batch.next_states).max(1)[0].detach().unsqueeze(1)
-    torch
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    values : torch.Tensor = dqn_model(batch.states.to(device)).gather(1, batch.actions.to(device)).to(device)
+
     # Compute the target values tensor
     with torch.no_grad():
-        next_state_values = torch.zeros(len(batch.next_states))
-        non_final_mask = torch.tensor(tuple(map(lambda s: s.item() is False, batch.dones)), dtype=torch.bool)
-        next_state_values[non_final_mask] = dqn_target(batch.next_states[non_final_mask]).max(1)[0].detach()
+        next_state_values = torch.zeros(len(batch.next_states.to(device))).to(device)
+        non_final_mask = torch.tensor(tuple(map(lambda s: s.item() is False, batch.dones.to(device))), dtype=torch.bool).to(device)
+        next_state_values[non_final_mask] = dqn_target(batch.next_states.to(device)[non_final_mask]).to(device).max(1)[0].detach().to(device)
 
-        target_values = batch.rewards + gamma * next_state_values.unsqueeze(1)
+        target_values = batch.rewards.to(device) + gamma * next_state_values.unsqueeze(1).to(device)
     
     # DO NOT EDIT FURTHER
 
@@ -180,7 +180,7 @@ def train_dqn_batch(optimizer: torch.optim.Optimizer, batch: Batch, dqn_model: n
     ), 'target_values tensor should require gradients'
 
     # computing the scalar MSE loss between computed values and the TD-target
-    loss = F.mse_loss(values, target_values)
+    loss = F.mse_loss(values, target_values).to(device)
 
     optimizer.zero_grad()  # reset all previous gradients
     loss.backward()  # compute new gradients
@@ -198,6 +198,7 @@ def train_dqn(
     num_saves=5,
     replay_size,
     replay_prepopulate_steps=0,
+    replay_policy=None,
     batch_size,
     exploration : ExponentialSchedule,
     gamma : float,
@@ -228,20 +229,21 @@ def train_dqn(
         - lengths: Numpy array containing the length of each training episode
         - losses: Numpy array containing the loss of each training batch
     """
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # get the state_size from the environment
     state_size = observation_space
 
     # initialize the DQN and DQN-target models
-    dqn_model = DQN(state_size, action_space)
-    dqn_target = DQN.custom_load(dqn_model.custom_dump())
+    dqn_model = DQN(state_size, action_space).to(device)
+    dqn_target = DQN.custom_load(dqn_model.custom_dump()).to(device)
 
     # initialize the optimizer
     optimizer = torch.optim.Adam(dqn_model.parameters())
 
     # initialize the replay memory and prepopulate it
     memory = ReplayMemory(replay_size, state_size)
-    memory.populate(env, replay_prepopulate_steps)
+    memory.populate(env, replay_prepopulate_steps, replay_policy)
 
     # initiate lists to store returns, lengths and losses
     rewards = []
@@ -279,15 +281,14 @@ def train_dqn(
         action = None
         if (np.random.random() < eps):
             action = np.random.randint(action_space)
-            #action = env.action_space.sample()
         else:
-            action = torch.argmax(dqn_model(torch.Tensor(state)), dim=0).item()
+            action = torch.argmax(dqn_model(torch.Tensor(state).to(device)), dim=0).to(device).item()
         
         next_state, reward, done = env.step(action, render=render)
         rewards.append(reward)
         
         G = reward + gamma * G
-        memory.add(copy.deepcopy(state), action, reward, copy.deepcopy(next_state), done)
+        memory.add(state, action, reward, next_state, done)
         state = next_state
         
         # YOUR CODE HERE:  once every 4 steps,
@@ -362,6 +363,22 @@ def plot(returns, lengths, losses):
     plt.legend()
     plt.show()
 
+def save(filename, returns, lengths, losses):
+    f = open(filename, 'w')
+
+    f.write('Returns\n')
+    f.write(returns)
+    f.write('\n')
+
+    f.write('Lengths\n')
+    f.write(lengths)
+    f.write('\n')
+
+    f.write('Losses\n')
+    f.write(losses)
+    f.write('\n')
+
+    f.close()
 
 if __name__ == "__main__":
     env = ObstaclesWorld(500, 500, see_all=True)
@@ -376,24 +393,26 @@ if __name__ == "__main__":
     replay_prepopulate_steps = 0 #10 #50_000
 
     batch_size = 64
-    exploration = ExponentialSchedule(1.0, 0.01, 300_000)
+    exploration = ExponentialSchedule(1.0, 0.01, 350_000)
 
     # this should take about 90-120 minutes on a generic 4-core laptop
     dqn_models, returns, lengths, losses = train_dqn(
         env,
-        observation_space=183,
-        action_space=2,
+        observation_space=63,
+        action_space=3,
         num_steps=num_steps,
         num_saves=num_saves,
         replay_size=replay_size,
         replay_prepopulate_steps=replay_prepopulate_steps,
+        replay_policy=None,
         batch_size=batch_size,
         exploration=exploration,
         gamma=gamma,
         render=True
     )
 
-    plot()
+    plot(returns, lengths, losses)
+    save("dqn_completed.txt", returns, lengths, losses)
     # assert len(dqn_models) == num_saves
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
 

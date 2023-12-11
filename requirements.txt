@@ -1,9 +1,6 @@
 numpy
 matplotlib
-ipywidgets
-jupyter
 more_itertools
 torch==1.10.1
 tqdm
-gym[box2d]==0.21.0
-pyglet==1.5.27
+tkinter

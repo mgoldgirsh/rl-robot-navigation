@@ -7,13 +7,13 @@ from enum import IntEnum
 
 class RobotAction(IntEnum):
     FORWARD = 0, # vel = 1, rotation = 0
-    ROTATE_LEFT = 1 # vel = 0, rotation = 1
-    ROTATE_RIGHT = -1 # vel = 0, rotation = -1
+    ROTATE_LEFT = 1 # vel = 0, rotation = 3s
+    ROTATE_RIGHT = 2 # vel = 0, rotation = -3
     
 
 class GenericWorld: 
     
-    
+
     def __init__(self, width: int, height: int, refresh_rate:int=10, manual:bool=False, see_all:bool=False) -> None:
         self.width = width
         self.height = height
@@ -40,7 +40,7 @@ class GenericWorld:
         # the distances objects are from the location of the robot
         # this is called the point cloud
         # the first index is the minimum most location of the point cloud
-        self.point_cloud = np.ones(shape=self.fov+1) 
+        self.point_cloud = np.ones(shape=self.fov//3+1) 
         
         # whethere to accept manual inputs
         self.manual = manual
@@ -81,7 +81,7 @@ class GenericWorld:
     def _draw_fov(self, size=2) -> None:
         i = 0
         
-        for fov_angle in range(self.angle - self.fov // 2, self.angle + self.fov // 2+1):
+        for fov_angle in range(self.angle - self.fov // 2, self.angle + self.fov // 2+1, 3):
             updated_pos = (self.pos[0] + np.cos(-fov_angle * np.pi/180) * self.point_cloud[i],
                            self.pos[1] + np.sin(-fov_angle * np.pi/180) * self.point_cloud[i])
             self.canvas.create_oval(updated_pos[0] - size/2, updated_pos[1] - size/2, 
@@ -107,20 +107,24 @@ class GenericWorld:
     def _calculate_distance_from(self, fov_angle: int, index: int) -> float:        
         constants = (self.pos[0], self.pos[1])
         
-        distances = [self.max_view]
+        min_distance = self.max_view
         for obstacle in self._obstacles:
-            min_distance = obstacle.calculate_intersection(fov_angle, constants, self.max_view)
-                
-            distances.append(min_distance)
+            test_distance = obstacle.calculate_intersection(fov_angle, constants, self.max_view)
+
+            if (test_distance < min_distance):
+                min_distance = test_distance
             
-        self.point_cloud[index] = min(distances)
-        return min(distances)
+        self.point_cloud[index] = min_distance
+        return min_distance
     
     
     def _update_point_cloud(self) -> None:
         i = 0
         
-        for fov_angle in range(self.angle - self.fov // 2, self.angle + self.fov // 2+1):
+        fov_angles = range(self.angle - self.fov // 2, self.angle + self.fov // 2 + 1, 3)
+
+        # Threaded code
+        for fov_angle in fov_angles:
             t = Thread(target = lambda: self._calculate_distance_from(fov_angle, i))
             t.start()
             t.join()
@@ -247,10 +251,10 @@ class GenericWorld:
             self.rotational_vel = 0
         elif (action == RobotAction.ROTATE_LEFT):
             self.vel = 0
-            self.rotational_vel = 1
+            self.rotational_vel = 3
         elif (action == RobotAction.ROTATE_RIGHT):
             self.vel = 0
-            self.rotational_vel = -1
+            self.rotational_vel = -3
             
         # update the simulation env
         # tick one timestep
@@ -262,6 +266,7 @@ class GenericWorld:
         # the parameters to return
         reward = 0
         done = False
+        distance_to_goal = ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
         
         if (self._within_goal()):
             self.reset()
@@ -276,10 +281,10 @@ class GenericWorld:
         else: 
             # return the next state 
             # calculate how close the goal is to the pos 
-            reward = ((((self.pos[0] - self.goal[0]) ** 2  + (self.pos[1] - self.goal[1]) ** 2) ** .5 / self.max_view) * -1) - 1
+            reward =  1 - (distance_to_goal / self.max_view)
             done = False
             
-        distance_to_goal = ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
+        
         observation = np.append([distance_to_goal, self.angle], self.point_cloud)
         return observation, reward, done
 

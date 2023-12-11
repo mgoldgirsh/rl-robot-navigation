@@ -17,12 +17,12 @@ The environment has been simplified from the ROS environment.
 The `observation space` of the simulation is 
 1. the distance from the goal
 2. the angle robot is facing
-3. the fov of the robot (the point cloud) (a `np.array` of length 180)
+3. the fov of the robot (the point cloud) (a `np.array` of length 61)s
 
 The `action space` of the simulation has been simplified to a discrete action space with 
 1. `RobotAction.FORWARD` - sets the linear velocity of the robot to 1
-2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 1
-3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -1
+2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 3
+3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -3
 
 ## Installation 
 Git clone into this repository using the following command.
