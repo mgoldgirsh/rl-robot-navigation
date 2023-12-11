@@ -15,10 +15,9 @@ The goal is for the robot to navigation to a random goal point in the environmen
 The environment has been simplified from the ROS environment. 
 
 The `observation space` of the simulation is 
-1. the robots position x
-2. the robots position y
-3. the angle robot is facing
-4. the fov of the robot (the point cloud) (a `np.array` of length 180)
+1. the distance from the goal
+2. the angle robot is facing
+3. the fov of the robot (the point cloud) (a `np.array` of length 180)
 
 The `action space` of the simulation has been simplified to a discrete action space with 
 1. `RobotAction.FORWARD` - sets the linear velocity of the robot to 1
