@@ -386,14 +386,14 @@ if __name__ == "__main__":
 
     # we train for many time-steps;  as usual, you can decrease this during development / debugging.
     # but make sure to restore it to 1_500_000 before submitting.
-    num_steps = 500_000
+    num_steps = 100_000
     num_saves = 5  # save models at 0%, 25%, 50%, 75% and 100% of training
 
-    replay_size = 200_000
+    replay_size = 30_000
     replay_prepopulate_steps = 0 #10 #50_000
 
     batch_size = 64
-    exploration = ExponentialSchedule(1.0, 0.01, 350_000)
+    exploration = ExponentialSchedule(1.0, 0.01, 80_000)
 
     # this should take about 90-120 minutes on a generic 4-core laptop
     dqn_models, returns, lengths, losses = train_dqn(
