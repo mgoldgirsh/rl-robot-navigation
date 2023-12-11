@@ -38,6 +38,10 @@ class ExpertPolicy():
         #     self.has_collision_count -= 1
         #     return RobotAction.FORWARD
         
+        # test the angle to go 
+        while (angle_to_go % 3 != 0):
+            angle_to_go += 1
+        
         if (cur_angle < angle_to_go):
             return RobotAction.ROTATE_LEFT
         elif(cur_angle > angle_to_go):

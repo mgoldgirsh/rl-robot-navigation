@@ -111,19 +111,19 @@ class ReplayMemory:
             policy = np.random.randint(len(RobotAction))
         
         step = 0
-        state = env.reset()
+        state = env.reset(render=True)
         while step < num_steps:
             print('at time step', step)
             action = policy(state)
             
-            next_state, reward, done = env.step(action)
+            next_state, reward, done = env.step(action, render=True)
             
             # add to replay buffer
             self.add(state, action, reward, next_state, done)
             
             if (done):
                 # if terminated
-                state = env.reset()
+                state = env.reset(render=True)
             else:
                 # get next state
                 state = next_state

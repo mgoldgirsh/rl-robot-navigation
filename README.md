@@ -41,7 +41,7 @@ Then
 pip3 install -r requirements.txt
 ```
 
-Run `dqn.py` for DQN learning, or run `imitation.py` for immitation learning. Train and see results! :)
+Run `dqn.py` for DQN learning, `point_and_shoot.py` for "point and shoot" algorithm, or run `imitation.py` for imitation learning. Train and see results! :)
 
 ## Algorithms used for Training
 
@@ -50,10 +50,15 @@ The following algorithms are used to train the robot and generate an optimal pol
 1. DQN - Deep Q-Learning
     - This reinforcment algorithm was chosen to act as a baseline for how the robot would perform in this updated environment
 
-2. Imitation Learning 
+2. "point and shoot" algorithm
+	- This algorithm is used as a baseline to compare the results obtained by reinforcement learning methods with a simple goto goal algorithm.
+
+3. Imitation Learning 
+	- A combination between the "point and shoot" algorithm and DQN
+	- the replay buffer is trained with point and shoot and then trained with DQN
     - This reinforcement algorithm was chosen to see how the robot would perform when given expert (`ExpertPolicy`) provided data to train on and see the results of such as policy.
 
-3. TODO: add more?
+4. TODO: add more?
 
 
 ## Citations
