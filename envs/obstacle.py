@@ -1,7 +1,5 @@
 from typing import Tuple
 import numpy as np
-from threading import Thread
-import multiprocessing
 
 class Obstacle: 
     

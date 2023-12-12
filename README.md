@@ -24,6 +24,21 @@ The `action space` of the simulation has been simplified to a discrete action sp
 2. `RobotAction.ROTATE_LEFT` - sets the angular velocity of the rotation to 3
 3. `RobotAction.ROTATE_RIGHT` - sets the angular velocity of the rotation to -3
 
+The `reward` calculation of the simulation looks like the following: 
+1. When the goal position is reached the reward is $R = 100$
+2. When a collision occurs the reward is $R = -100$
+3. On every other step if the action is the move forward action the reward is defined with the following:
+    $$
+    R = 1 - \frac {\texttt{distance to goal}} {\texttt{max distance possible}}
+    $$
+
+    Otherwise when the action is a roatation the reward is: 
+    $$
+    R = 0
+    $$
+
+
+
 ## Installation 
 Git clone into this repository using the following command.
 ```bash
@@ -60,6 +75,8 @@ The following algorithms are used to train the robot and generate an optimal pol
 
 4. TODO: add more?
 
+## TODO
+see `todo.md` 
 
 ## Citations
     @ARTICLE{9645287,

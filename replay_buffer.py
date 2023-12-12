@@ -3,9 +3,6 @@ from collections import namedtuple
 import numpy as np
 import torch
 
-import torch.nn as nn
-import torch.nn.functional as F
-
 from envs.generic_env import RobotAction
 
 # Batch namedtuple, i.e. a class which contains the given attributes
