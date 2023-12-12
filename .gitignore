@@ -2,3 +2,4 @@
 __pycache__
 .vscode
 graph_gen.py
+plots
