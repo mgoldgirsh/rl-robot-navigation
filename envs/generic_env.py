@@ -104,10 +104,53 @@ class GenericWorld:
             self.pos = updated_pos
             
     
+    def _min_distance_to_wall(self, fov_angle):
+        # idea first get the corners 
+        # print(fov_angle)
+        top = 0
+        bot = self.height
+        left = 0
+        right = self.width
+        
+        
+        # if going exactly right
+        if (fov_angle == 0):
+            return abs(right - self.pos[0])
+        elif (fov_angle == 180 or fov_angle == -180):
+             return abs(left - self.pos[0])
+        
+        if (fov_angle == -90):
+            return abs(top - self.pos[1])
+        elif (fov_angle == 90):
+            return abs(bot - self.pos[1])
+                    
+        
+        if (fov_angle > 0 and fov_angle < 90):
+            # top right corner
+            h = top - self.pos[1]
+            w = right - self.pos[0]
+            return min(abs(h / np.sin(fov_angle * np.pi / 180)), abs(w / np.cos(fov_angle * np.pi / 180)))
+        elif (fov_angle > 90 and fov_angle < 180):
+            h = top - self.pos[1]
+            w = left - self.pos[0]
+            return min(abs(h / np.sin(fov_angle * np.pi / 180)), abs(w / np.cos(fov_angle * np.pi / 180)))
+        elif (fov_angle < 0 and fov_angle > -90):
+            h = bot - self.pos[1]
+            w = right - self.pos[0]
+            return min(abs(h / np.sin(fov_angle * np.pi / 180)), abs(w / np.cos(fov_angle * np.pi / 180)))
+        elif (fov_angle < -90 and fov_angle > -180):
+            h = bot - self.pos[1]
+            w = left - self.pos[0]
+            return min(abs(h / np.sin(fov_angle * np.pi / 180)), abs(w / np.cos(fov_angle * np.pi / 180)))
+        
+        
+        #return min(abs(horiz), abs(vert))
+        return self.max_view
+    
     def _calculate_distance_from(self, fov_angle: int, index: int) -> float:        
         constants = (self.pos[0], self.pos[1])
         
-        min_distance = self.max_view
+        min_distance = self._min_distance_to_wall(fov_angle)
         for obstacle in self._obstacles:
             test_distance = obstacle.calculate_intersection(fov_angle, constants, self.max_view)
 
@@ -251,10 +294,10 @@ class GenericWorld:
             self.rotational_vel = 0
         elif (action == RobotAction.ROTATE_LEFT):
             self.vel = 0
-            self.rotational_vel = 3
+            self.rotational_vel = 1
         elif (action == RobotAction.ROTATE_RIGHT):
             self.vel = 0
-            self.rotational_vel = -3
+            self.rotational_vel = -1
             
         # update the simulation env
         # tick one timestep

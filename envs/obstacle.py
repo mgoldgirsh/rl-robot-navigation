@@ -89,6 +89,59 @@ class Obstacle:
             return max_view 
         else:
             return result[0]
+        
+        
+        # top = self.y1
+        # bot = self.y2
+        # left = self.x2
+        # right = self.x1
+        # # fov_angle = -fov_angle
+        
+        
+        # # if going exactly right
+        # if (fov_angle == 0):
+        #     return abs(right - current_pos[0])
+        # elif (fov_angle == 180 or fov_angle == -180):
+        #      return abs(left - current_pos[0])
+        
+        # if (fov_angle == -90):
+        #     return abs(top - current_pos[1])
+        # elif (fov_angle == 90):
+        #     return abs(bot - current_pos[1])
+        
+        # def better_min(v1, v2):
+        #     if (abs(v1) < abs(v2)):
+        #         return v1
+        #     else:
+        #         return v2
+          
+        # dist = 0
+        # if (fov_angle > 0 and fov_angle < 90):
+        #     # top right corner
+        #     h = top - current_pos[1]
+        #     w = right - current_pos[0]
+        #     dist = better_min(h / np.sin(fov_angle * np.pi / 180), w / np.cos(fov_angle * np.pi / 180))
+        # elif (fov_angle > 90 and fov_angle < 180):
+        #     h = top - current_pos[1]
+        #     w = left - current_pos[0]
+        #     dist = better_min(h / np.sin(fov_angle * np.pi / 180), w / np.cos(fov_angle * np.pi / 180))
+        # elif (fov_angle < 0 and fov_angle > -90):
+        #     h = bot - current_pos[1]
+        #     w = right - current_pos[0]
+        #     dist = better_min(h / np.sin(fov_angle * np.pi / 180), w / np.cos(fov_angle * np.pi / 180))
+        # elif (fov_angle < -90 and fov_angle > -180):
+        #     h = bot - current_pos[1]
+        #     w = left - current_pos[0]
+        #     dist = better_min(h / np.sin(fov_angle * np.pi / 180), w / np.cos(fov_angle * np.pi / 180))
+        
+        # update_pos = (current_pos[0] + dist * np.cos(-fov_angle * np.pi/180), 
+        #         current_pos[1] + dist * np.sin(-fov_angle * np.pi/180))
+        # if (self.collides_with(update_pos)):
+        #     print('here')
+        #     return abs(dist)
+        
+        # #return min(abs(horiz), abs(vert))
+        # return max_view
 
     @staticmethod
     def absolute_min(i1, i2):
