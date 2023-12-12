@@ -1,7 +1,7 @@
 from tkinter import *
 import numpy as np
 from typing import List, Tuple
-from .obstacle import Obstacle
+from obstacle import Obstacle
 from threading import Thread
 from enum import IntEnum
 
@@ -325,7 +325,7 @@ class GenericWorld:
             # return the next state 
             # calculate how close the goal is to the pos 
             if (action == RobotAction.ROTATE_LEFT or action == RobotAction.ROTATE_RIGHT):
-                reward =  (-distance_to_goal / self.max_view)
+                reward =  0#(-distance_to_goal / self.max_view)
             else:
                 reward =  1 - (distance_to_goal / self.max_view)
             done = False
@@ -336,16 +336,17 @@ class GenericWorld:
 
 
 if __name__ == "__main__":
-    world = GenericWorld(500, 500, manual=False)
-    world.reset()
+    world = GenericWorld(500, 500, manual=True)
+    world.render()
+    # world.reset()
     
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
-    print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
+    # print(world.step(RobotAction.FORWARD))
 
 
 
