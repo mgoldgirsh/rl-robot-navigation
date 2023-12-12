@@ -3,6 +3,7 @@ from exp_schedule import ExponentialSchedule
 from dqn import train_dqn, plot, save
 from expert_policy import ExpertPolicy
 from tqdm import trange
+import numpy as np
 
 if __name__ == "__main__":
     env = ObstaclesWorld(500, 500, see_all=True)
@@ -11,7 +12,7 @@ if __name__ == "__main__":
     
 
     
-    steps = 1_000
+    steps = 50_000
     env.reset(render=True)
     G = 0
     done = False
@@ -35,8 +36,8 @@ if __name__ == "__main__":
             timestep = 0
             
 
-    save("point_and_shoot.txt", returns, lengths, losses)
-    plot(returns, lengths, losses)
+    save("results/point_and_shoot.txt", returns, lengths, losses)
+    plot(np.array(returns), np.array(lengths), np.array(losses))
     # assert len(dqn_models) == num_saves
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
 

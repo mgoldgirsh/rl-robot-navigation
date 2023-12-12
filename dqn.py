@@ -341,23 +341,24 @@ def plot(returns, lengths, losses):
     ### YOUR PLOTTING CODE HERE
     plt.plot(range(len(returns)), returns, color='red', alpha=0.5, label='raw return data')
     plt.plot(range(len(returns)), rolling_average(data=returns, window_size=100), color='red', label='smooth return data')
-    plt.title("MountainCar: Return per Episode")
+    plt.title("Autonomous Nav: Return per Episode")
     plt.xlabel("Episode")
     plt.ylabel("Discounted Return")
     plt.legend()
     plt.show()
-
-    plt.plot(range(len(losses)), losses, color='blue', alpha=0.5, label='raw loss data')
-    plt.plot(range(len(losses)), rolling_average(data=losses, window_size=100), color='blue', label='smooth loss data')
-    plt.title("MountainCar: Loss per 4 Steps")
-    plt.xlabel("4 Steps")
-    plt.ylabel("Loss value")
-    plt.legend()
-    plt.show()
-
+    
+    if (len(losses) != 0):
+        plt.plot(range(len(losses)), losses, color='blue', alpha=0.5, label='raw loss data')
+        plt.plot(range(len(losses)), rolling_average(data=losses, window_size=100), color='blue', label='smooth loss data')
+        plt.title("Autonomous Nav: Loss per 4 Steps")
+        plt.xlabel("4 Steps")
+        plt.ylabel("Loss value")
+        plt.legend()
+        plt.show()
+    
     plt.plot(range(len(lengths)), lengths, color='green', alpha=0.5, label='raw length data')
     plt.plot(range(len(lengths)), rolling_average(data=lengths, window_size=100), color='green', label='smooth length data')
-    plt.title("MountainCar: Epsiode Length per Episode")
+    plt.title("Autonomous Nav: Epsiode Length per Episode")
     plt.xlabel("Episode")
     plt.ylabel("Episode Length")
     plt.legend()
@@ -367,15 +368,15 @@ def save(filename, returns, lengths, losses):
     f = open(filename, 'w')
 
     f.write('Returns\n')
-    f.write(returns)
+    f.write(str(returns))
     f.write('\n')
 
     f.write('Lengths\n')
-    f.write(lengths)
+    f.write(str(lengths))
     f.write('\n')
 
     f.write('Losses\n')
-    f.write(losses)
+    f.write(str(losses))
     f.write('\n')
 
     f.close()
@@ -411,7 +412,7 @@ if __name__ == "__main__":
         render=True
     )
 
-    save("dqn_completed.txt", returns, lengths, losses)
+    save("results/dqn_completed.txt", returns, lengths, losses)
     plot(returns, lengths, losses)
     # assert len(dqn_models) == num_saves
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
