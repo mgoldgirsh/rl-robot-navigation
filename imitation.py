@@ -35,8 +35,8 @@ if __name__ == "__main__":
         render=True
     )
 
+    save("imitation.txt", returns, lengths, losses)
     plot(returns, lengths, losses)
-    save("dqn_completed.txt", returns, lengths, losses)
     # assert len(dqn_models) == num_saves
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
 
