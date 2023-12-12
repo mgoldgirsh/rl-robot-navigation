@@ -325,7 +325,7 @@ class GenericWorld:
             # return the next state 
             # calculate how close the goal is to the pos 
             if (action == RobotAction.ROTATE_LEFT or action == RobotAction.ROTATE_RIGHT):
-                reward = (-2 * distance_to_goal / self.max_view)
+                reward =  (-distance_to_goal / self.max_view)
             else:
                 reward =  1 - (distance_to_goal / self.max_view)
             done = False
