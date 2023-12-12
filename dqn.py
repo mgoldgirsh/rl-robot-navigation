@@ -340,7 +340,7 @@ def train_dqn(
 def plot(returns, lengths, losses):
     ### YOUR PLOTTING CODE HERE
     plt.plot(range(len(returns)), returns, color='red', alpha=0.5, label='raw return data')
-    plt.plot(range(len(returns)), rolling_average(data=returns, window_size=100), color='red', label='smooth return data')
+    plt.plot(range(len(returns)), rolling_average(data=returns, window_size=10), color='red', label='smooth return data')
     plt.title("Autonomous Nav: Return per Episode")
     plt.xlabel("Episode")
     plt.ylabel("Discounted Return")
@@ -349,7 +349,7 @@ def plot(returns, lengths, losses):
     
     if (len(losses) != 0):
         plt.plot(range(len(losses)), losses, color='blue', alpha=0.5, label='raw loss data')
-        plt.plot(range(len(losses)), rolling_average(data=losses, window_size=100), color='blue', label='smooth loss data')
+        plt.plot(range(len(losses)), rolling_average(data=losses, window_size=10), color='blue', label='smooth loss data')
         plt.title("Autonomous Nav: Loss per 4 Steps")
         plt.xlabel("4 Steps")
         plt.ylabel("Loss value")
@@ -357,7 +357,7 @@ def plot(returns, lengths, losses):
         plt.show()
     
     plt.plot(range(len(lengths)), lengths, color='green', alpha=0.5, label='raw length data')
-    plt.plot(range(len(lengths)), rolling_average(data=lengths, window_size=100), color='green', label='smooth length data')
+    plt.plot(range(len(lengths)), rolling_average(data=lengths, window_size=10), color='green', label='smooth length data')
     plt.title("Autonomous Nav: Epsiode Length per Episode")
     plt.xlabel("Episode")
     plt.ylabel("Episode Length")
