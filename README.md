@@ -28,14 +28,10 @@ The `reward` calculation of the simulation looks like the following:
 1. When the goal position is reached the reward is $R = 100$
 2. When a collision occurs the reward is $R = -100$
 3. On every other step if the action is the move forward action the reward is defined with the following:
-    $$
-    R = 1 - \frac {\texttt{distance to goal}} {\texttt{max distance possible}}
-    $$
+$$R = 1 - \frac {\texttt{distance to goal}} {\texttt{max distance possible}}$$
 
     Otherwise when the action is a roatation the reward is: 
-    $$
-    R = 0
-    $$
+$$R = 0$$
 
 
 
