@@ -6,9 +6,7 @@ import torch
 from envs.generic_env import RobotAction
 
 # Batch namedtuple, i.e. a class which contains the given attributes
-Batch = namedtuple(
-    'Batch', ('states', 'actions', 'rewards', 'next_states', 'dones')
-)
+Batch = namedtuple("Batch", ("states", "actions", "rewards", "next_states", "dones"))
 
 
 class ReplayMemory:
@@ -53,9 +51,9 @@ class ReplayMemory:
         self.states[self.idx] = torch.from_numpy(state)
         self.actions[self.idx] = torch.Tensor([action])
         self.rewards[self.idx] = torch.Tensor([reward])
-        self.next_states[self.idx] =torch.from_numpy(next_state)
+        self.next_states[self.idx] = torch.from_numpy(next_state)
         self.dones[self.idx] = torch.Tensor([done])
-        
+
         # DO NOT EDIT
         # circulate the pointer to the next position
         self.idx = (self.idx + 1) % self.max_size
@@ -78,22 +76,29 @@ class ReplayMemory:
         # be a `Batch`.
 
         sample_indices = []
-        if (batch_size > self.size):
+        if batch_size > self.size:
             sample_indices = range(self.size)
         else:
-            sample_indices = np.random.choice(range(self.size), size=batch_size, replace=False)
-        
-        batch = Batch(
-            states = self.states[sample_indices],
-            actions = self.actions[sample_indices],
-            rewards= self.rewards[sample_indices],
-            next_states = self.next_states[sample_indices],
-            dones = self.dones[sample_indices]
+            sample_indices = np.random.choice(
+                range(self.size), size=batch_size, replace=False
             )
+
+        batch = Batch(
+            states=self.states[sample_indices],
+            actions=self.actions[sample_indices],
+            rewards=self.rewards[sample_indices],
+            next_states=self.next_states[sample_indices],
+            dones=self.dones[sample_indices],
+        )
 
         return batch
 
-    def populate(self, env, num_steps, policy: callable = None,):
+    def populate(
+        self,
+        env,
+        num_steps,
+        policy: callable = None,
+    ):
         """Populate this replay memory with `num_steps` from the random policy.
 
         :param env:  Openai Gym environment
@@ -104,25 +109,25 @@ class ReplayMemory:
         # populate the replay memory with the resulting transitions.
         # Hint:  don't repeat code!  Use the self.add() method!
 
-        if (policy is None):
+        if policy is None:
             policy = np.random.randint(len(RobotAction))
-        
+
         step = 0
         state = env.reset(render=True)
         while step < num_steps:
-            print('at time step', step)
+            print("at time step", step)
             action = policy(state)
-            
+
             next_state, reward, done = env.step(action, render=True)
-            
+
             # add to replay buffer
             self.add(state, action, reward, next_state, done)
-            
-            if (done):
+
+            if done:
                 # if terminated
                 state = env.reset(render=True)
             else:
                 # get next state
                 state = next_state
-            
+
             step += 1

@@ -9,9 +9,7 @@ if __name__ == "__main__":
     env = ObstaclesWorld(500, 500, see_all=True)
     policy = ExpertPolicy(env)
     gamma = 0.99
-    
 
-    
     steps = 50_000
     env.reset(render=True)
     G = 0
@@ -26,15 +24,14 @@ if __name__ == "__main__":
         next_state, reward, done = env.step(action, render=True)
         timestep += 1
         G = reward + gamma * G
-        if (done): 
-            print('discounted return', G, 'timestep', timestep)
+        if done:
+            print("discounted return", G, "timestep", timestep)
             env.reset(render=True)
             returns.append(G)
             lengths.append(timestep)
             done = False
             G = 0
             timestep = 0
-            
 
     save("results/point_and_shoot.txt", returns, lengths, losses)
     plot(np.array(returns), np.array(lengths), np.array(losses))

@@ -12,6 +12,7 @@ from envs.obstacles_env import ObstaclesWorld
 from envs.generic_env import GenericWorld
 from replay_buffer import ReplayBuffer
 
+
 def evaluate(network, epoch, eval_episodes=10):
     avg_reward = 0.0
     col = 0
@@ -36,6 +37,7 @@ def evaluate(network, epoch, eval_episodes=10):
     )
     print("..............................................")
     return avg_reward
+
 
 class Actor(nn.Module):
     def __init__(self, state_dim, action_dim):
@@ -85,7 +87,8 @@ class Critic(nn.Module):
         q2 = self.layer_6(s2)
         return q1, q2
 
-class TD3: 
+
+class TD3:
     def __init__(self, state_dim, action_dim, max_action, env: GenericWorld) -> None:
         self.actor = Actor(state_dim, action_dim).to(device)
         self.actor_target = Actor(state_dim, action_dim).to(device)
@@ -100,12 +103,12 @@ class TD3:
 
         self.max_action = max_action
         self.iter_count = 0
-        
+
     def get_action(self, state):
         # Function to get the action from the actor
         state = torch.Tensor(state.reshape(1, -1)).to(device)
         return self.actor(state).cpu().data.numpy().flatten()
-    
+
     def train(
         self,
         replay_buffer,
@@ -196,7 +199,8 @@ class TD3:
         self.writer.add_scalar("loss", av_loss / iterations, self.iter_count)
         self.writer.add_scalar("Av. Q", av_Q / iterations, self.iter_count)
         self.writer.add_scalar("Max. Q", max_Q, self.iter_count)
-    
+
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # cuda or cpu
     seed = 0  # Random seed number
@@ -205,9 +209,7 @@ if __name__ == "__main__":
     eval_ep = 10  # number of episodes for evaluation
     max_timesteps = 5e6  # Maximum number of steps to perform
     expl_noise = 1  # Initial exploration noise starting value in range [expl_min ... 1]
-    expl_decay_steps = (
-        500000  # Number of steps over which the initial exploration noise will decay over
-    )
+    expl_decay_steps = 500000  # Number of steps over which the initial exploration noise will decay over
     expl_min = 0.1  # Exploration noise after the decay in range [0...expl_noise]
     batch_size = 40  # Size of the mini-batch
     discount = 0.99999  # Discount factor to calculate the discounted future reward (should be close to 1)
@@ -217,7 +219,7 @@ if __name__ == "__main__":
     policy_freq = 2  # Frequency of Actor network updates
     buffer_size = 1e6  # Maximum size of the buffer
     random_near_obstacle = True  # To take random actions near obstacles or not
-    
+
     # Create the training environment
     environment_dim = 20
     robot_dim = 4
@@ -228,7 +230,7 @@ if __name__ == "__main__":
     state_dim = environment_dim + robot_dim
     action_dim = 2
     max_action = 1
-    
+
     # ------------- running the program -----------------
     # Create the network
     network = TD3(state_dim, action_dim, max_action)

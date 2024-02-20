@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class ExponentialSchedule:
     def __init__(self, value_from, value_to, num_steps):
         """Exponential schedule from `value_from` to `value_to` in `num_steps` steps.
@@ -34,13 +35,13 @@ class ExponentialSchedule:
         # YOUR CODE HERE:  implement the schedule rule as described in the docstring,
         # using attributes `self.a` and `self.b`.
         value = None
-        if (step <= 0):
+        if step <= 0:
             value = self.value_from
-        elif (step >= self.num_steps - 1):
+        elif step >= self.num_steps - 1:
             value = self.value_to
         else:
             value = self.a * np.exp(step * self.b)
-        
+
         return value
 
 
@@ -52,7 +53,7 @@ def _test_schedule(schedule, step, value, ndigits=5):
     v = schedule.value(step)
     if not round(v, ndigits) == round(value, ndigits):
         raise Exception(
-            f'For step {step}, the scheduler returned {v} instead of {value}'
+            f"For step {step}, the scheduler returned {v} instead of {value}"
         )
 
 
