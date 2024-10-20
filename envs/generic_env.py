@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import *
 import numpy as np
 from typing import List, Tuple
@@ -8,7 +9,7 @@ from utils import convert_to_radians
 
 
 class RobotAction(IntEnum):
-    FORWARD = (0,)  # vel = 1, rotation = 0
+    FORWARD = 0  # vel = 1, rotation = 0
     ROTATE_LEFT = 1  # vel = 0, rotation = 3s
     ROTATE_RIGHT = 2  # vel = 0, rotation = -3
 
@@ -38,12 +39,12 @@ class GenericWorld:
 
         # the goal to goto
         self.goal = self._generate_random_position()
-        self.goalbox = 10  # the full box side length around the goal
+        self.goalbox = 20  # the full box side length around the goal
 
         # the distances objects are from the location of the robot
         # this is called the point cloud
         # the first index is the minimum most location of the point cloud
-        self.point_cloud = np.ones(shape=self.fov + 1)
+        self.point_cloud = [1] * (self.fov + 1)
 
         # whether to accept manual inputs
         self.manual = manual
@@ -75,17 +76,12 @@ class GenericWorld:
         self.canvas.create_arc(
             coord, start=self.angle + 157.5, extent=45, fill="red", tags=("robot")
         )
+        self.canvas.create_text(self.width-85, 20, text=f'Position: {round(self.pos[0], 2), round(self.pos[1],2)}')
+        self.canvas.create_text(self.width-44, 35, text=f'Angle: {round(self.angle, 2)}°')
 
     def _draw_obstacles(self) -> None:
         for obstacle in self._obstacles:
-            self.canvas.create_rectangle(
-                obstacle.x1,
-                obstacle.y1,
-                obstacle.x2,
-                obstacle.y2,
-                fill="black",
-                tags=("obstacle"),
-            )
+            obstacle.create_obstacle(self.canvas)
 
     def _draw_goal(self) -> None:
         box_side = self.goalbox / 2
@@ -105,24 +101,16 @@ class GenericWorld:
         ):
             updated_pos = (
                 self.pos[0]
-                + np.cos(fov_angle * np.pi / 180)
+                + np.cos(self._normalize_angle(fov_angle) * np.pi / 180)
                 * self.point_cloud[i],
                 self.pos[1]
-                + np.sin(-fov_angle * np.pi / 180)
+                - np.sin(self._normalize_angle(fov_angle) * np.pi / 180)
                 * self.point_cloud[i])
-            # print(
-            #     (
-            #         updated_pos[0] - size / 2,
-            #         updated_pos[1] - size / 2,
-            #         updated_pos[0] + size / 2,
-            #         updated_pos[1] + size / 2,
-            #     )
-            # )
             self.canvas.create_oval(
-                updated_pos[0] - size / 2,
-                updated_pos[1] - size / 2,
-                updated_pos[0] + size / 2,
-                updated_pos[1] + size / 2,
+                min(max(updated_pos[0], 5), self.width - 1) - size / 2,
+                min(max(updated_pos[1], 5), self.height - 1) - size / 2,
+                min(max(updated_pos[0], 5), self.width - 1) + size / 2,
+                min(max(updated_pos[1], 5), self.height - 1) + size / 2,
                 fill="black",
                 tags="fov",
             )
@@ -134,11 +122,7 @@ class GenericWorld:
 
         # standardize the fov_angle
         # the range of the fov_angle should -180 to 180
-        if self.angle < -180:
-            self.angle += 360
-        elif self.angle > 180:
-            self.angle -= 360
-        print(self.angle)
+        self.angle = self._normalize_angle(self.angle)
 
         updated_vel = (
             self.vel * np.cos(convert_to_radians(self.angle)),
@@ -152,38 +136,40 @@ class GenericWorld:
         else:
             self.pos = updated_pos
 
-    def _distance_to_wall(self, fov_angle: int):
-        # calculates the distance from the robot to the wall at the specified angle
+    def _distance_to_wall(self, fov_angle: int) -> Tuple[int, int]:
+        # given the fov_angle in degrees calculate the distance to the nearest wall
+        # this calculated using the quadratic formula
+        if 0 <= fov_angle < 90:
+            # you have to be looking at top/right walls
+            vert_dist = self.pos[1]
+            horiz_dist = self.width - self.pos[0]
+        elif 90 <= fov_angle < 180:
+            # looking at top/left walls
+            vert_dist = self.pos[1]
+            horiz_dist = self.pos[0]
 
-        # x = 5
-        left_wall = 5
-        # x = height - 5
-        right_wall = self.width - 5
+        elif -90 <= fov_angle < 0:
+            # looking at bottom/right walls
+            vert_dist = self.height - self.pos[1]
+            horiz_dist = self.width - self.pos[0]
+        else:
+            # looking at bottom/left walls
+            vert_dist = self.height - self.pos[1]
+            horiz_dist = self.pos[0]
 
-        # y = 5
-        top_wall = 5
-        # y = height - 5
-        bot_wall = self.height - 5
+        if fov_angle == 0:
+            return horiz_dist
+        if fov_angle == 90 or fov_angle == -90:
+            return vert_dist
 
-        # now knowing the walls calculate where the intersection occurs
-        # check the 1st quadrant (top-right)
-        if 0 < fov_angle <= 90:
-            delta_x = right_wall - self.pos[0]
-            delta_y = self.pos[1] - top_wall
+        # calculate vert/horiz distance from the top and left points of intersection
+        calc_vert = np.tan(fov_angle * np.pi / 180) * horiz_dist
+        calc_horiz = 1/np.tan(fov_angle * np.pi / 180) * vert_dist
 
-            dist_to_horizontal_wall = delta_x / np.cos(convert_to_radians(fov_angle))
-            dist_to_vertical_wall = delta_y / np.sin(convert_to_radians(fov_angle))
-
-            return min(dist_to_horizontal_wall, dist_to_vertical_wall)
-        # elif -90 < fov_angle <= 0:
-        #     # the bottom left quadrant
-        #     delta_x = self.pos[0] - left_wall
-        #     delta_y = bot_wall - self.pos[1]
-        #     dist_to_horizontal_wall = delta_x / np.cos(convert_to_radians(fov_angle))
-        #     dist_to_vertical_wall = delta_y / np.sin(convert_to_radians(fov_angle))
-        #     return min(dist_to_horizontal_wall, dist_to_vertical_wall)
-
-        return 10
+        if abs(calc_vert) < abs(calc_horiz):
+            return (calc_vert ** 2 + horiz_dist ** 2) ** .5
+        else:
+            return (calc_horiz ** 2 + vert_dist ** 2) ** .5
 
     def _update_point_cloud(self) -> np.array:
         # the goal of the point cloud is to generate list of distances of how far way something is from the
@@ -192,7 +178,11 @@ class GenericWorld:
         fov_angles = range(self.angle - self.fov // 2, self.angle + self.fov // 2 + 1)
         i = 0
         for fov_angle in fov_angles:
-            self.point_cloud[i] = self._distance_to_wall(fov_angle)
+            self.point_cloud[i] = min(
+                [obs.distance_to_robot(self.pos, self._normalize_angle(fov_angle)) for obs in self._obstacles] +
+                [self._distance_to_wall(self._normalize_angle(fov_angle))]
+            )
+            i += 1
 
         return self.point_cloud
 
@@ -202,11 +192,10 @@ class GenericWorld:
         self._update_point_cloud()
 
     def _update(self) -> None:
-        # print(self.angle, self.point_cloud[0], self.point_cloud[90], self.point_cloud[180])
-        # print(self.point_cloud)
-        # print(self.pos, self.vel, self.angle)
         # reset canvas
         self.canvas.delete("all")
+        self.canvas.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.canvas.create_rectangle(4, 4, self.width, self.height, outline='black', width=1)
 
         # update all data
         self._update_data()
@@ -225,23 +214,18 @@ class GenericWorld:
 
     def _onKeyPress(self, event) -> None:
         if event.keysym == "Left":
-            print("rotating")
             self.vel = 0
             self.rotational_vel = 1
         elif event.keysym == "Right":
-            print("rotating")
             self.vel = 0
             self.rotational_vel = -1
         elif event.keysym == "Up":
-            print("moving forward")
             self.rotational_vel = 0
             self.vel = 1
         elif event.keysym == "Down":
-            print("moving backwards")
             self.rotational_vel = 0
             self.vel = -1
         elif event.keysym == "0":
-            print("0 pressed | velocity reset | angle reset")
             self.vel = 0
             self.rotational_vel = 0
 
@@ -251,6 +235,9 @@ class GenericWorld:
     def add_obstacles(self, obstacles: List[Obstacle]) -> None:
         for obstacle in obstacles:
             self._obstacles.append(obstacle)
+
+    def clear_obstacles(self):
+        self._obstacles.clear()
 
     def has_collision(self, position) -> bool:
         collides = any(
@@ -293,7 +280,22 @@ class GenericWorld:
         else:
             return False
 
+    @staticmethod
+    def _normalize_angle(angle: int) -> int:
+        if angle < -180:
+            angle += 360
+        elif angle > 180:
+            angle -= 360
+        return angle
+
+    def _distance_to_goal(self) -> float:
+        return ((self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2) ** 0.5
+
+    def _generate_new_world(self):
+        pass
+
     def reset(self, render: bool = False) -> np.array:
+        self._generate_new_world()
         self.pos = self._generate_random_position()
         self.goal = self._generate_random_position()
         self.angle = 0
@@ -304,9 +306,7 @@ class GenericWorld:
         else:
             self._update_data()
 
-        distance_to_goal = (
-                                   (self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2
-                           ) ** 0.5
+        distance_to_goal = self._distance_to_goal()
         observation = np.append([distance_to_goal, self.angle], self.point_cloud)
         return observation
 
@@ -336,30 +336,51 @@ class GenericWorld:
         # the parameters to return
         reward = 0
         done = False
-        distance_to_goal = (
-                                   (self.pos[0] - self.goal[0]) ** 2 + (self.pos[1] - self.goal[1]) ** 2
-                           ) ** 0.5
+        max_dist = (self.width ** 2 + self.height ** 2) ** .5
+        optimal_angle = self._normalize_angle(round(-np.arctan2(self.goal[1] - self.pos[1],
+                                                                (self.goal[0] - self.pos[0])) * 180/np.pi))
+        angle_delta = abs(self._normalize_angle(self.angle)) - abs(self._normalize_angle(optimal_angle))
+
+        distance_to_goal = self._distance_to_goal()
 
         if self._within_goal():
-            self.reset()
-            reward = 100.0
+            self.reset(render=render)
+            reward = 500.0
             done = True
 
-        # wrong here
         elif self.has_collision(self.pos):
-            self.reset()
+            self.reset(render=render)
             reward = -100.0
             done = True
         else:
             # return the next state
             # calculate how close the goal is to the pos
-            if action == RobotAction.ROTATE_LEFT or action == RobotAction.ROTATE_RIGHT:
-                reward = 0  # (-distance_to_goal / self.max_view)
+            dist_reward = 5 * (distance_to_goal / max_dist)
+
+            # calculate if the robot is facing towards the goal
+            angle_reward = (abs(angle_delta) / 180)
+
+            # print(optimal_angle, self.angle)
+            # print('dist', dist_reward, 'angle', angle_reward)
+
+            if action == RobotAction.ROTATE_RIGHT or action == RobotAction.ROTATE_LEFT:
+                # can make reward more specific for angles here too
+                reward = -angle_reward
             else:
-                reward = 1 - (distance_to_goal / self.max_view)
+                # if abs(angle_delta) < 10:
+                reward = dist_reward
+                # else:
+                #     reward = -dist_reward - angle_reward
+            # else:
+            #     reward = -dist_reward
+
+            # print(self.angle, optimal_angle)
+            # print(dist_reward, angle_reward)
+
+            # reward = -(dist_reward + angle_reward)
             done = False
 
-        observation = np.append([distance_to_goal, self.angle], self.point_cloud)
+        observation = np.append([distance_to_goal, angle_delta], self.point_cloud)
         return observation, reward, done
 
 

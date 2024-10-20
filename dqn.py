@@ -10,6 +10,7 @@ from replay_buffer import Batch, ReplayMemory
 from exp_schedule import ExponentialSchedule
 from envs.generic_env import GenericWorld
 from envs.obstacles_env import ObstaclesWorld
+from envs.stochastic_env import StochasticWorld
 
 
 def rolling_average(data, *, window_size):
@@ -311,6 +312,10 @@ def train_dqn(
             )
 
         next_state, reward, done = env.step(action, render=render)
+        if t_episode == 5000:
+            done = True
+            reward = -100
+            env.reset(render=True)
         rewards.append(reward)
 
         G = reward + gamma * G
@@ -434,24 +439,24 @@ def save(filename, returns, lengths, losses):
 
 
 if __name__ == "__main__":
-    env = ObstaclesWorld(500, 500, see_all=True)
+    env = StochasticWorld(500, 500, see_all=True)
     gamma = 0.99
 
     # we train for many time-steps;  as usual, you can decrease this during development / debugging.
     # but make sure to restore it to 1_500_000 before submitting.
-    num_steps = 100_000
+    num_steps = 600_000
     num_saves = 5  # save models at 0%, 25%, 50%, 75% and 100% of training
 
-    replay_size = 30_000
-    replay_prepopulate_steps = 0  # 10 #50_000
+    replay_size = 200_000
+    replay_prepopulate_steps = 50_000
 
     batch_size = 64
-    exploration = ExponentialSchedule(1.0, 0.01, 80_000)
+    exploration = ExponentialSchedule(1.0, 0.01, 400_000)
 
     # this should take about 90-120 minutes on a generic 4-core laptop
     dqn_models, returns, lengths, losses = train_dqn(
         env,
-        observation_space=63,
+        observation_space=183,
         action_space=3,
         num_steps=num_steps,
         num_saves=num_saves,
@@ -470,5 +475,5 @@ if __name__ == "__main__":
     # assert all(isinstance(value, DQN) for value in dqn_models.values())
 
     # saving computed models to disk, so that we can load and visualize them later.
-    # checkpoint = {key: dqn.custom_dump() for key, dqn in dqn_models.items()}
-    # torch.save(checkpoint, f'checkpoint_{env.spec.id}.pt')
+    checkpoint = {key: dqn.custom_dump() for key, dqn in dqn_models.items()}
+    torch.save(checkpoint, f'checkpoint_{env.spec.id}.pt')

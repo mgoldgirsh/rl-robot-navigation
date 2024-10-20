@@ -1,4 +1,4 @@
-from envs.obstacles_env import ObstaclesWorld
+from envs.stochastic_env import StochasticWorld
 from exp_schedule import ExponentialSchedule
 from dqn import train_dqn, plot, save
 from expert_policy import ExpertPolicy
@@ -6,11 +6,11 @@ from tqdm import trange
 import numpy as np
 
 if __name__ == "__main__":
-    env = ObstaclesWorld(500, 500, see_all=True)
+    env = StochasticWorld(500, 500, see_all=True)
     policy = ExpertPolicy(env)
     gamma = 0.99
 
-    steps = 50_000
+    steps = 5_000
     env.reset(render=True)
     G = 0
     done = False
@@ -35,9 +35,3 @@ if __name__ == "__main__":
 
     save("results/point_and_shoot.txt", returns, lengths, losses)
     plot(np.array(returns), np.array(lengths), np.array(losses))
-    # assert len(dqn_models) == num_saves
-    # assert all(isinstance(value, DQN) for value in dqn_models.values())
-
-    # saving computed models to disk, so that we can load and visualize them later.
-    # checkpoint = {key: dqn.custom_dump() for key, dqn in dqn_models.items()}
-    # torch.save(checkpoint, f'checkpoint_{env.spec.id}.pt')

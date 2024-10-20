@@ -2,6 +2,7 @@ from collections import namedtuple
 
 import numpy as np
 import torch
+import tqdm
 
 from envs.generic_env import RobotAction
 
@@ -108,26 +109,23 @@ class ReplayMemory:
         # YOUR CODE HERE:  run a random policy for `num_steps` time-steps and
         # populate the replay memory with the resulting transitions.
         # Hint:  don't repeat code!  Use the self.add() method!
-
         if policy is None:
-            policy = np.random.randint(len(RobotAction))
+            policy = lambda s: np.random.randint(0, len(RobotAction))
 
-        step = 0
-        state = env.reset(render=True)
-        while step < num_steps:
-            print("at time step", step)
+        state = env.reset(render=False)
+        for step in tqdm.trange(num_steps):
             action = policy(state)
 
-            next_state, reward, done = env.step(action, render=True)
+            next_state, reward, done = env.step(action, render=False)
 
             # add to replay buffer
             self.add(state, action, reward, next_state, done)
 
             if done:
                 # if terminated
-                state = env.reset(render=True)
+                state = env.reset(render=False)
             else:
                 # get next state
                 state = next_state
 
-            step += 1
+        print('replay populated.')

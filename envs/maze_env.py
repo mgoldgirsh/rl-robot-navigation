@@ -50,5 +50,4 @@ class MazeWorld(GenericWorld):
 
 if __name__ == "__main__":
     maze_world = MazeWorld(500, 500, manual=True)
-    maze_world.reset()
     maze_world.render()
